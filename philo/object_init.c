@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 12:28:46 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/06 15:03:14 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/07 20:12:45 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,6 @@ int philos_init(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
 		(*philos)[i].right_fork = &(*forks)[(i + 1) % (*info)->philos_nb];
 		if (pthread_create(&(*philos)[i].id, NULL, thread_func, &(*philos)[i]) != 0)
 			return (write(2, "pthread_create failed!\n", 24), -1);
-		// if (pthread_detach((*philos)[i].id) != 0)
-		// 	return (write(2, "pthread_detach failed!\n", 24), -1);
 		i++;
 	}
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 15:15:01 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/06 12:28:15 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/07 19:17:34 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ typedef	struct s_philosopher
 	pthread_mutex_t *right_fork;
 }t_philo;
 
-void ft_sleep(time_t amount);
+void ft_sleep(t_pinfo *data, time_t amount);
 time_t get_time();
 int	ft_atoi(const char *str);
 void *thread_func(void *param);

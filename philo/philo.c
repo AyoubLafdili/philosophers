@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 15:14:51 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/06 15:05:27 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/07 20:35:40 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,27 @@ time_t get_time()
 	return (current_time.tv_sec * 1000 + (current_time.tv_usec / 1000));
 }
 
-void ft_sleep(time_t amount)
+void ft_sleep(t_pinfo *data, time_t amount)
 {
-	time_t	start;	
+	time_t	start;
 
 	start = get_time();
 	while (get_time() - start < amount)
-		;
+	{
+		pthread_mutex_lock(&data->_flag);
+		if (data->flag == -1)
+		{
+			pthread_mutex_unlock(&data->_flag);
+			break ;
+		}
+		pthread_mutex_unlock(&data->_flag);
+		usleep(100);
+	}
 }
-
+int monitor_func(t_pinfo	*info, t_philo *philos)
+{
+	
+}
 int	main(int ac, char *av[])
 {
 	int counter;
@@ -58,21 +70,18 @@ int	main(int ac, char *av[])
 			pthread_mutex_destroy(&forks[counter++]);
 		return (free(info), free(forks), free(philos), 5);
 	}
-	pthread_mutex_lock(&info->_start);
+
 	info->start = get_time();
-	pthread_mutex_unlock(&info->_start);
 	pthread_mutex_lock(&info->_flag);
 	info->flag = 0;
 	pthread_mutex_unlock(&info->_flag);
-
 	counter = 0;
-	ft_sleep(100);
+	ft_sleep(info, 100);
 	while (counter < info->philos_nb)
 	{
 		pthread_mutex_lock(philos[counter].p_meal);
 		if (get_time() - philos[counter].last_meal >= info->die_time)
 		{
-			
 			pthread_mutex_lock(&info->_flag);
 			info->flag = -1;
 			pthread_mutex_unlock(&info->_flag);
@@ -80,10 +89,7 @@ int	main(int ac, char *av[])
 			pthread_mutex_unlock(philos[counter].p_meal);
 			counter = 0;
 			while (counter < info->philos_nb)
-			{
-				pthread_join(philos[counter].id, NULL);
-				counter++;				
-			}
+				pthread_join(philos[counter++].id, NULL);
 			return (free(forks), free(philos), 0);
 		}
 		pthread_mutex_unlock(philos[counter].p_meal);
