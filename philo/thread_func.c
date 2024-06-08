@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 12:30:23 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/07 20:26:27 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/08 17:54:17 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,12 @@ int ft_print(t_philo *param, char *msg)
 	if (param->initial_info->flag != -1)
 	{
 		pthread_mutex_lock(param->p_start);
-		printf("%ld\t%d\t%s\n", get_time() - param->initial_info->start, param->order, msg);
+		printf("%ld\t%d\t%s\n", get_time() - param->initial_info->start_sim, param->order, msg);
 		pthread_mutex_unlock(param->p_start);
 		pthread_mutex_unlock(param->p_flag);
 		return (0);
 	}
-	else
-		pthread_mutex_unlock(param->p_flag);
+	pthread_mutex_unlock(param->p_flag);
 	return (1);
 }
 
@@ -75,10 +74,14 @@ int eat(t_philo *philo)
 	}
 	ft_sleep(philo->initial_info, philo->initial_info->eat_time);
 	pthread_mutex_lock(philo->p_meal);
+	philo->meals_nb++;
 	philo->last_meal = get_time();
 	pthread_mutex_unlock(philo->p_meal);
 	pthread_mutex_unlock(philo->own_fork);
-	return (pthread_mutex_unlock(philo->right_fork), 0);
+	pthread_mutex_unlock(philo->right_fork);
+	if (philo->initial_info->eat_time_nb != -1 && philo->meals_nb == philo->initial_info->eat_time_nb)
+		return (1);
+	return (0);
 }
 
 void *thread_func(void *param)

@@ -5,7 +5,7 @@ FLAGS = -Wall -Wextra -Werror -pthread -fsanitize=undefined  -fsanitize=thread -
 
 _CLEAN = rm -rf
 
-SRC = philo.c parsing.c ft_atoi.c thread_func.c object_init.c
+SRC = philo.c parsing.c ft_atoi.c thread_func.c object_init.c ft_time.c utils.c
 
 OBJ = $(SRC:%.c=%.o)
 

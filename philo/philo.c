@@ -6,94 +6,122 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 15:14:51 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/07 20:35:40 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/08 22:32:24 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-time_t get_time()
+void ft_update_flag(t_pinfo *info, int set_val)
 {
-	struct timeval current_time;
-	
-	gettimeofday(&current_time, NULL);
-	return (current_time.tv_sec * 1000 + (current_time.tv_usec / 1000));
-}
-
-void ft_sleep(t_pinfo *data, time_t amount)
-{
-	time_t	start;
-
-	start = get_time();
-	while (get_time() - start < amount)
-	{
-		pthread_mutex_lock(&data->_flag);
-		if (data->flag == -1)
-		{
-			pthread_mutex_unlock(&data->_flag);
-			break ;
-		}
-		pthread_mutex_unlock(&data->_flag);
-		usleep(100);
-	}
-}
-int monitor_func(t_pinfo	*info, t_philo *philos)
-{
-	
-}
-int	main(int ac, char *av[])
-{
-	int counter;
-	t_pinfo	*info;
-	pthread_mutex_t *forks;
-	t_philo *philos;
-
-	counter = 0;
-	if (ac < 5 || ac > 6)
-		return (write(2, "Wrong number of arguments!\n", 28), 1);
-	info = malloc(sizeof(t_pinfo));
-	if (!info)
-		return (write(2, "malloc failed!\n", 16), 3);
-	if (pars_args(&info, av, ac))
-		return (write(2, "Invalid args!\n", 15), 2);
-	forks = malloc(sizeof(pthread_mutex_t) * info->philos_nb);
-	if (!forks)
-		return (free(info), write(2, "malloc failed!\n", 16), 3);
-	philos = malloc(sizeof(t_philo) * info->philos_nb);
-	if (!philos)
-		return (free(info), free(forks), write(2, "malloc failed!\n", 16), 3);
-	if (forks_init(info, &forks) == -1)
-		return (free(info), free(philos), free(forks), 4);
-	if (philos_init(&info, &philos, &forks) == -1)
-	{
-		while (counter < info->philos_nb)
-			pthread_mutex_destroy(&forks[counter++]);
-		return (free(info), free(forks), free(philos), 5);
-	}
-
-	info->start = get_time();
 	pthread_mutex_lock(&info->_flag);
-	info->flag = 0;
+	info->flag = set_val;
 	pthread_mutex_unlock(&info->_flag);
-	counter = 0;
-	ft_sleep(info, 100);
-	while (counter < info->philos_nb)
+}
+int is_done(t_philo *philos)
+{
+	int i;
+	int max;
+
+	i = 0;
+	max = philos[0].initial_info->eat_time_nb;
+	while(i < philos[0].initial_info->philos_nb)
 	{
-		pthread_mutex_lock(philos[counter].p_meal);
-		if (get_time() - philos[counter].last_meal >= info->die_time)
+		pthread_mutex_lock(philos[i].p_meal);
+		if (philos[i].meals_nb != max)
 		{
-			pthread_mutex_lock(&info->_flag);
-			info->flag = -1;
-			pthread_mutex_unlock(&info->_flag);
-			printf("%ld\t%d\tis died\n", get_time() - info->start, philos[counter].order);
-			pthread_mutex_unlock(philos[counter].p_meal);
-			counter = 0;
-			while (counter < info->philos_nb)
-				pthread_join(philos[counter++].id, NULL);
-			return (free(forks), free(philos), 0);
+			pthread_mutex_unlock(philos[i].p_meal);
+			return (1);
 		}
-		pthread_mutex_unlock(philos[counter].p_meal);
-		counter = (counter + 1) % info->philos_nb;
+		pthread_mutex_unlock(philos[i].p_meal);
+		i++;
 	}
 	return (0);
 }
+
+int check_mels(t_philo *philos, int index)
+{
+	int time_to_die;
+
+	time_to_die = philos[0].initial_info->die_time;
+	pthread_mutex_lock(philos[index].p_meal);
+	if (get_time() - philos[index].last_meal >= time_to_die)
+	{
+		pthread_mutex_unlock(philos[index].p_meal);
+		return (0);
+	}
+	pthread_mutex_unlock(philos[index].p_meal);
+	return (1);
+}
+
+int monitor2_func(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
+{
+	int i;
+	int rvalue;
+
+	i = 0;
+	info->start_sim = get_time();
+	ft_update_flag(info, 0);
+	ft_sleep(info, 60);
+	while (i < info->philos_nb)
+	{
+		if ((rvalue = is_done(philos)) == 0 || !check_mels(philos, i))
+		{
+			ft_update_flag(info, -1);
+			if (rvalue != 0)
+				printf("%ld\t%d\tis died\n", get_time() - info->start_sim, philos[i].order);
+			return (ft_clean(info, philos), free(forks), 0);
+		}
+		i = (i + 1) % info->philos_nb;
+	}
+	return (0);
+}
+
+int monitor_func(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
+{
+	int i;
+
+	i = 0;
+	info->start_sim = get_time();
+	ft_update_flag(info, 0);
+	ft_sleep(info, 60);
+	while (i < info->philos_nb)
+	{
+		if (!check_mels(philos, i))
+		{
+			ft_update_flag(info, -1);
+			printf("%ld\t%d\tis died\n", get_time() - info->start_sim, philos[i].order);
+			return (ft_clean(info, philos), free(forks), 0);
+		}
+		i = (i + 1) % info->philos_nb;
+	}
+	return (0);
+}
+
+int	main(int ac, char *av[])
+{
+	t_pinfo			*info;
+	t_philo			*philos;
+	pthread_mutex_t	*forks;
+	int				rvalue;
+
+	if (ac < 5 || ac > 6)
+		return (put_error("Wrong number of arguments!"), 1);
+	info = malloc(sizeof(t_pinfo));
+	if (!info)
+		return (put_error("malloc failed!"), 3);
+	if (pars_args(&info, av, ac, &rvalue))
+		return (free(info), rvalue);
+	forks = malloc(sizeof(pthread_mutex_t) * info->philos_nb);
+	if (!forks)
+		return (free(info), put_error("malloc failed!"), 3);
+	philos = malloc(sizeof(t_philo) * info->philos_nb);
+	if (!philos)
+		return (free(info), free(forks), put_error("malloc failed!"), 3);
+	if ((rvalue = init_object(&info, &philos, &forks)) != 0)
+		return (rvalue);
+	if (info->eat_time_nb == -1)
+		return (monitor_func(info, philos, forks));
+	return (monitor2_func(info, philos, forks));
+}
+
