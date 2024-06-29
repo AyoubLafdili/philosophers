@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 12:30:23 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/10 11:18:43 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:19:52 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,17 @@ int	ft_print(t_philo *param, char *msg)
 {
 	time_t	time_stamp;
 
-	if (check_flag(param->initial_info) != -1)
+	pthread_mutex_lock(param->p_flag);
+	if (param->initial_info->flag != -1)
 	{
 		pthread_mutex_lock(param->p_start);
 		time_stamp = get_time() - param->initial_info->start;
-		printf("%ld\t%d\t%s\n", time_stamp, param->order, msg);
 		pthread_mutex_unlock(param->p_start);
+		printf("%ld\t%d\t%s\n", time_stamp, param->order, msg);
+		pthread_mutex_unlock(param->p_flag);
 		return (0);
 	}
+	pthread_mutex_unlock(param->p_flag);
 	return (1);
 }
 

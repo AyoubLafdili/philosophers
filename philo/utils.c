@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 23:36:39 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/10 11:00:59 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:26:10 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ int	check_flag(t_pinfo *info)
 {
 	int	rvalue;
 
-	rvalue = 0;
 	pthread_mutex_lock(&info->_flag);
 	rvalue = info->flag;
 	pthread_mutex_unlock(&info->_flag);

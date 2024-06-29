@@ -1,7 +1,7 @@
 NAME = philo
 
 COMPILER = cc
-FLAGS = -Wall -Wextra -Werror -pthread -fsanitize=undefined  -fsanitize=thread -g -Wunreachable-code
+FLAGS = -Wall -Wextra -Werror -pthread #-fsanitize=undefined  -fsanitize=thread -g -Wunreachable-code
 
 _CLEAN = rm -rf
 
