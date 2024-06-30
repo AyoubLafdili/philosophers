@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 12:57:11 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/29 22:32:35 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,23 @@
 # include <sys/time.h>
 # include <string.h>
 
-# define READ "\033[1;31m"
-# define END "\033[1;m"
-# define YEL "\033[1;33m"
+# define READ "\033[31m"
+# define YEL "\033[33m"
+# define END "\033[0m"
 # define TOOK "has taken a fork"
 # define DIED "is died"
 # define EAT "is eating"
 # define SLEEP "is sleeping"
 # define THINK "is thinking"
+
+typedef enum e_exit_code
+{
+	NO_ERR,
+	PARC ,
+	F_INIT ,
+	F_MALLOC ,
+	F_CREATE_TH
+}	t_code;
 
 typedef struct s_semaphores
 {
@@ -39,58 +48,50 @@ typedef struct s_semaphores
 	sem_t			*forks;
 	sem_t			*s_died;
 	sem_t			*s_meals_nb;
-} t_sem;
-
-
-typedef enum e_errors_name
-{
-	NO_ERR,
-	PARC ,
-	F_MALLOC ,
-	F_CREATE_TH ,
-	F_INIT
-} t_error;
+}	t_sem;
 
 typedef struct s_global_info
 {
-	int				philos_nb;
+	int				ph_nb;
 	int				die_time;
 	int				eat_time;
 	int				sleep_time;
 	int				eat_time_nb;
 	int				*flag;
-	t_sem			sem;
 	time_t			start;
 	pthread_t		monitor_id;
+	t_sem			sem;
 }	t_pinfo;
 
 typedef struct s_philosophers
 {
-	pthread_t 		id;
-	pid_t			pid;
 	int				order;
 	int				died;
 	int				meals_nb;
+	pid_t			pid;
 	time_t			last_meal;
+	pthread_t		id;
+	char			*sem_name;
 	sem_t			*s_meal;
 	t_pinfo			*shared_info;
 }	t_philo;
 
 time_t	get_time(void);
 int		ft_isdigit(int c);
-void	put_error(char *msg);
-void	ft_sleep(time_t amount);
 int		ft_atoi(char *str);
+void	ft_sleep(time_t amount);
 int		child_func(t_philo *philo);
-int		check_flag(t_pinfo *info);
-int		init_object(t_pinfo *info, t_philo **philo);
-int		manda_monitor(t_pinfo *info, t_philo *philos);
-int		opt_monitor(t_pinfo *info, t_philo *philos);
-int		clean_up(t_philo *philo, int end);
 time_t	get_timestamp(t_philo philo);
-time_t get_last_meal(t_philo *philo);
+time_t	get_last_meal(t_philo *philo);
+void	put_error(char *msg, char flag);
+int		clean_up(t_philo *philo, int end);
+void	before_exit(t_philo *philo, char *msg);
+void	free_sem_names(t_philo *philo, int end);
 int		clean_semaphores(t_pinfo *info, int order);
-void	name_semaphore(char *dest, char *name, int ph_order);
+int		init_object(t_pinfo *info, t_philo **philo);
+int		opt_monitor(t_pinfo *info, t_philo *philos);
+int		manda_monitor(t_pinfo *info, t_philo *philos);
+char	*name_semaphore(char *name, int ph_order);
 int		pars_args(t_pinfo *init, char **args, int ac, int *rvalue);
 
 #endif

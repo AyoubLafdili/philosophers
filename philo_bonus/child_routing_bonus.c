@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/12 18:25:18 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/29 22:32:30 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,19 @@
 
 void	ft_print(t_philo *philo, char *msg)
 {
-	int order;
+	int	order;
 
 	order = philo->order;
 	sem_wait(philo->shared_info->sem.s_print);
-		printf("%ld\t%d\t%s\n", get_timestamp(*philo), order, msg);
+	printf("%ld\t%d\t%s\n", get_timestamp(*philo), order, msg);
 	sem_post(philo->shared_info->sem.s_print);
 }
 
 int	eat(t_philo *philo)
 {
-	// printf("befor first fork philo order %d\n", philo->order);
 	sem_wait(philo->shared_info->sem.forks);
-	// printf("after first fork philo order %d\n", philo->order);
 	ft_print(philo, TOOK);
-	if (philo->shared_info->philos_nb == 1)
+	if (philo->shared_info->ph_nb == 1)
 		return (1);
 	sem_wait(philo->shared_info->sem.forks);
 	ft_print(philo, TOOK);
@@ -43,41 +41,37 @@ int	eat(t_philo *philo)
 	return (0);
 }
 
-
-void before_exit(t_philo *philo, char *msg)
+void	*child_routing(void *param)
 {
-	sem_wait(philo->shared_info->sem.s_print);
-	if (!msg)
-		printf("%ld\t%d\t%s\n", get_timestamp(*philo), philo->order, DIED);
-	else
-		put_error(msg);
-	sem_post(philo->shared_info->sem.s_died);
-	sem_close(philo->shared_info->sem.s_died);
-	sem_close(philo->shared_info->sem.s_meals_nb);
-	sem_close(philo->s_meal);
-}
+	t_philo	*philo;
+	int		meals_counter;
 
-void *child_routing(void *param)
-{
-	t_philo *philo;
-	
+	meals_counter = 0;
 	philo = (t_philo *)param;
 	while (1)
 	{
 		if (eat(philo))
 			return (NULL);
+		if (philo->shared_info->eat_time_nb != -2
+			&& meals_counter == philo->shared_info->eat_time_nb)
+		{
+			sem_close(philo->shared_info->sem.s_died);
+			sem_close(philo->shared_info->sem.s_meals_nb);
+			sem_close(philo->s_meal);
+			exit(0);
+		}
 		ft_print(philo, SLEEP);
 		ft_sleep(philo->shared_info->sleep_time);
 		ft_print(philo, THINK);
+		meals_counter++;
 	}
 	return (NULL);
 }
 
-void child_sem_thread_init(t_philo *philo, char *sem_name)
+void	child_sem_thread_init(t_philo *philo)
 {
-	name_semaphore(sem_name, "/meal", philo->order);
-	sem_unlink(sem_name);
-	philo->s_meal = sem_open(sem_name, O_CREAT, 0666, 1);
+	sem_unlink(philo->sem_name);
+	philo->s_meal = sem_open(philo->sem_name, O_CREAT, 0666, 1);
 	if (philo->s_meal == SEM_FAILED)
 	{
 		before_exit(philo, "Cannot open/create child semaphore");
@@ -93,17 +87,16 @@ void child_sem_thread_init(t_philo *philo, char *sem_name)
 
 int	child_func(t_philo *philo)
 {
-	char		sem_name[10];
 	if (philo->order % 2 == 0)
 		ft_sleep(philo->shared_info->eat_time);
 	philo->last_meal = get_time();
-	child_sem_thread_init(philo, sem_name);
+	child_sem_thread_init(philo);
 	while (1)
 	{
 		if (get_last_meal(philo) >= philo->shared_info->die_time)
 		{
 			before_exit(philo, NULL);
-			sem_unlink(sem_name);
+			sem_unlink(philo->sem_name);
 			exit (NO_ERR);
 		}
 		usleep(300);

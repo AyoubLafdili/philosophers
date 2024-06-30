@@ -6,65 +6,28 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 13:08:23 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/29 22:32:51 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/30 22:22:05 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-int get_num_len(int nb)
+void	before_exit(t_philo *philo, char *msg)
 {
-	int i;
-
-	i = 0;
-	while (nb != 0)
-	{
-		nb /= 10;
-		i++;
-	}
-	return (i);
+	sem_wait(philo->shared_info->sem.s_print);
+	if (!msg)
+		printf("%ld\t%d\t%s\n", get_timestamp(*philo), philo->order, DIED);
+	else
+		put_error(msg, 0);
+	sem_post(philo->shared_info->sem.s_died);
+	sem_close(philo->shared_info->sem.s_died);
+	sem_close(philo->shared_info->sem.s_meals_nb);
+	sem_close(philo->s_meal);
 }
 
-void name_semaphore(char *dest, char *name, int ph_order)
+time_t	get_last_meal(t_philo *philo)
 {
-    int i;
-	int j;
-	int num_len;
-	char sub_name[4];
-
-    i = 0;
-    j = 0;
-	num_len = get_num_len(ph_order);
-	sub_name[num_len--] = '\0';
-	while (ph_order != 0)
-	{
-		sub_name[num_len] = ph_order % 10 + '0';
-		ph_order /= 10;
-		num_len--;
-	}
-    while (name[i])
-	{
-        dest[i] = name[i];
-		i++;
-	}
-	while (sub_name[j])
-		dest[i++] = sub_name[j++];
-    dest[i] = '\0';
-}
-
-int check_flag(t_pinfo *info)
-{
-	int status;
-
-	sem_wait(info->sem.s_race);
-	status = *info->flag;
-	sem_post(info->sem.s_race);
-	return (status);	
-}
-
-time_t get_last_meal(t_philo *philo)
-{
-	time_t timestamp;
+	time_t	timestamp;
 
 	sem_wait(philo->s_meal);
 	timestamp = get_time() - philo->last_meal;
@@ -72,20 +35,27 @@ time_t get_last_meal(t_philo *philo)
 	return (timestamp);
 }
 
-
-
 time_t	get_timestamp(t_philo philo)
 {
 	return (get_time() - philo.shared_info->start);
 }
-void	put_error(char *msg)
+
+void	put_error(char *msg, char flag)
 {
 	int	i;
 
 	i = 0;
 	while (msg[i])
 		i++;
-	write(2, msg, i);
+	if (flag > 0)
+		write(2, msg, i);
+	else
+	{
+		printf("DONE\n");
+		write(2, READ, 5);
+		write(2, msg, i);
+		write(2, END, 4);
+	}
 	write(2, "\n", 1);
 }
 
@@ -95,7 +65,3 @@ int	ft_isdigit(int c)
 		return (1);
 	return (0);
 }
-
-
-
-

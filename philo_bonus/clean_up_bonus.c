@@ -6,11 +6,23 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 08:50:55 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/29 16:56:58 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
+
+void	free_sem_names(t_philo *philo, int end)
+{
+	int	i;
+
+	i = 0;
+	while (i < end)
+	{
+		free(philo[i].sem_name);
+		i++;
+	}
+}
 
 void	sem_subclean(sem_t *sem, char *sem_name)
 {
@@ -37,21 +49,23 @@ int	clean_semaphores(t_pinfo *info, int order)
 	return (0);
 }
 
-int clean_up(t_philo *philo, int end)
+int	clean_up(t_philo *philo, int end)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < end)
 	{
 		kill(philo[i].pid, SIGKILL);
-		i++;  
+		sem_unlink(philo[i].sem_name);
+		i++;
 	}
 	i = 0;
 	while (waitpid(-1, NULL, 0) != -1)
 		;
 	clean_semaphores(philo[0].shared_info, 5);
-    free(philo[0].shared_info->flag);
+	free_sem_names(philo, philo->shared_info->ph_nb);
+	free(philo->shared_info->flag);
 	free(philo);
 	return (0);
 }

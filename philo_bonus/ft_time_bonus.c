@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 13:06:32 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/25 15:55:22 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/06/30 21:50:53 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,5 +27,4 @@ void	ft_sleep(time_t amount)
 	start = get_time();
 	while (get_time() - start < amount)
 		usleep(500);
-		// ;
 }
