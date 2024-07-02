@@ -6,18 +6,19 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 18:25:05 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 16:45:48 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-int	semaphore_init(t_pinfo *info)
+int	semaphore_init(t_ginfo *info)
 {
 	sem_unlink("/forks");
 	sem_unlink("/died");
 	sem_unlink("/print");
 	sem_unlink("/meals_nb");
+	sem_unlink("/race");
 	info->sem.forks = sem_open("/forks", O_CREAT | O_EXCL, 0666, info->ph_nb);
 	if (info->sem.forks == SEM_FAILED)
 		return (1);
@@ -33,7 +34,7 @@ int	semaphore_init(t_pinfo *info)
 	info->sem.s_race = sem_open("/race", O_CREAT | O_EXCL, 0666, 1);
 	if (info->sem.s_race == SEM_FAILED)
 		return (clean_semaphores(info, 4));
-	return (NO_ERR);
+	return (SUCCES);
 }
 
 int	create_sem_names(t_philo **philo, int end)
@@ -48,14 +49,14 @@ int	create_sem_names(t_philo **philo, int end)
 		{
 			free_sem_names(*philo, i);
 			put_error("Malloc failed!", 0);
-			return (1);
+			return (F_MALLOC);
 		}
 		i++;
 	}
-	return (0);
+	return (SUCCES);
 }
 
-int	init_object(t_pinfo *info, t_philo **philo)
+int	init_object(t_ginfo *info, t_philo **philo)
 {
 	int	i;
 
@@ -81,5 +82,5 @@ int	init_object(t_pinfo *info, t_philo **philo)
 			child_func(&(*philo)[i]);
 		i++;
 	}
-	return (NO_ERR);
+	return (SUCCES);
 }

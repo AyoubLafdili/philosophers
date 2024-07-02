@@ -6,13 +6,13 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 13:01:37 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 16:47:06 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-int	check_args(t_pinfo *data)
+int	check_args(t_ginfo *data)
 {
 	if (data->ph_nb == -1 || !(data)->ph_nb || data->ph_nb > 200)
 		return (put_error("Philo nb out of range ]0,200]!", 0), 1);
@@ -26,10 +26,10 @@ int	check_args(t_pinfo *data)
 		return (put_error("Eating time nb [0,INT_MAX] Needed", 0), 1);
 	if (data->eat_time_nb == 0)
 		return (2);
-	return (NO_ERR);
+	return (SUCCES);
 }
 
-int	init_info_struct(t_pinfo *init, char **args, int ac, int *rvalue)
+int	init_info_struct(t_ginfo *init, char **args, int ac, int *rvalue)
 {
 	init->ph_nb = ft_atoi(args[1]);
 	init->die_time = ft_atoi(args[2]);
@@ -48,12 +48,12 @@ int	init_info_struct(t_pinfo *init, char **args, int ac, int *rvalue)
 	{
 		if (*rvalue == 2)
 			*rvalue = 0;
-		return (free(init->flag), 1);
+		return (free(init->flag), FAILURE);
 	}
-	return (NO_ERR);
+	return (SUCCES);
 }
 
-int	pars_args(t_pinfo *init, char **args, int ac, int *rv)
+int	pars_args(t_ginfo *init, char **args, int ac, int *rv)
 {
 	int	i;
 	int	j;

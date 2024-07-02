@@ -6,13 +6,44 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 12:28:46 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/10 10:56:27 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 18:04:15 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	forks_init(t_pinfo *info, pthread_mutex_t **to_init)
+void	thread_termination(t_ginfo **info, t_philo **philos, int end)
+{
+	int	i;
+
+	i = 0;
+	ft_update_flag(*info, -1);
+	while (i < end)
+	{
+		pthread_join((*philos)[i].tid, NULL);
+		i++;
+	}
+}
+
+int	ft_init_mutex(t_ginfo **info)
+{
+	if (pthread_mutex_init(&(*info)->_flag, NULL))
+		return (-1);
+	if (pthread_mutex_init(&(*info)->_start, NULL))
+	{
+		pthread_mutex_destroy(&(*info)->_flag);
+		return (-1);
+	}
+	if (pthread_mutex_init(&(*info)->_meal, NULL))
+	{
+		pthread_mutex_destroy(&(*info)->_flag);
+		pthread_mutex_destroy(&(*info)->_start);
+		return (-1);
+	}
+	return (0);
+}
+
+int	forks_init(t_ginfo *info, pthread_mutex_t **to_init)
 {
 	int	i;
 	int	j;
@@ -35,35 +66,7 @@ int	forks_init(t_pinfo *info, pthread_mutex_t **to_init)
 	return (0);
 }
 
-int	ft_init_mutex(t_pinfo **info)
-{
-	if (pthread_mutex_init(&(*info)->_flag, NULL) != 0)
-		return (-1);
-	if (pthread_mutex_init(&(*info)->_start, NULL))
-	{
-		pthread_mutex_destroy(&(*info)->_flag);
-		return (-1);
-	}
-	if (pthread_mutex_init(&(*info)->meal, NULL))
-	{
-		pthread_mutex_destroy(&(*info)->_flag);
-		pthread_mutex_destroy(&(*info)->_start);
-		return (-1);
-	}
-	return (0);
-}
-
-/**
- * @brief 
- * 
- * @param info shared data stracutre between philos
- * @param philos data structure for each philo
- * @param forks struct of mutexes that represent the forks of philos
- * @return -2 on succes, -1 failure of mutix_init, [0, philo_nb] failure
- * of phtread_create, used to indicate which index i need to join.
- */
-
-int	philos_init(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
+int	philos_init(t_ginfo **info, t_philo **philos, pthread_mutex_t **forks)
 {
 	int	i;
 	int	c;
@@ -78,7 +81,7 @@ int	philos_init(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
 		(*philos)[i].order = i + 1;
 		(*philos)[i].meals_nb = 0;
 		(*philos)[i].last_meal = 0;
-		(*philos)[i].p_meal = &(*info)->meal;
+		(*philos)[i].p_meal = &(*info)->_meal;
 		(*philos)[i].initial_info = *info;
 		(*philos)[i].own_fork = &(*forks)[i];
 		(*philos)[i].right_fork = &(*forks)[(i + 1) % (*info)->philos_nb];
@@ -90,20 +93,7 @@ int	philos_init(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
 	return (-2);
 }
 
-void	thread_termination(t_pinfo **info, t_philo **philos, int threads)
-{
-	int	i;
-
-	i = 0;
-	ft_update_flag(*info, -1);
-	while (i < threads)
-	{
-		pthread_join((*philos)[i].tid, NULL);
-		i++;
-	}
-}
-
-int	init_object(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
+int	init_object(t_ginfo **info, t_philo **philos, pthread_mutex_t **forks)
 {
 	int	counter;
 	int	rvalue;
@@ -123,7 +113,7 @@ int	init_object(t_pinfo **info, t_philo **philos, pthread_mutex_t **forks)
 		thread_termination(info, philos, rvalue);
 		pthread_mutex_destroy(&(*info)->_flag);
 		pthread_mutex_destroy(&(*info)->_start);
-		pthread_mutex_destroy(&(*info)->meal);
+		pthread_mutex_destroy(&(*info)->_meal);
 		while (counter < (*info)->philos_nb)
 			pthread_mutex_destroy(&(*forks)[counter++]);
 		return (free(*info), free(*forks), free(*philos), 5);

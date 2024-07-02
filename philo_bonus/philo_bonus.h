@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 12:57:11 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 18:06:10 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,27 @@
 # include <signal.h>
 # include <unistd.h>
 # include <sys/time.h>
-# include <string.h>
+# include <sys/wait.h>
 
 # define READ "\033[31m"
 # define YEL "\033[33m"
 # define END "\033[0m"
-# define TOOK "has taken a fork"
+
+# define FORKED "has taken a fork"
 # define DIED "is died"
 # define EAT "is eating"
 # define SLEEP "is sleeping"
 # define THINK "is thinking"
 
-typedef enum e_exit_code
+enum e_exit_code
 {
-	NO_ERR,
+	SUCCES,
+	FAILURE,
 	PARC ,
 	F_INIT ,
 	F_MALLOC ,
 	F_CREATE_TH
-}	t_code;
+};
 
 typedef struct s_semaphores
 {
@@ -53,6 +55,7 @@ typedef struct s_semaphores
 typedef struct s_global_info
 {
 	int				ph_nb;
+	int				fd;
 	int				die_time;
 	int				eat_time;
 	int				sleep_time;
@@ -61,7 +64,7 @@ typedef struct s_global_info
 	time_t			start;
 	pthread_t		monitor_id;
 	t_sem			sem;
-}	t_pinfo;
+}	t_ginfo;
 
 typedef struct s_philosophers
 {
@@ -73,7 +76,7 @@ typedef struct s_philosophers
 	pthread_t		id;
 	char			*sem_name;
 	sem_t			*s_meal;
-	t_pinfo			*shared_info;
+	t_ginfo			*shared_info;
 }	t_philo;
 
 time_t	get_time(void);
@@ -87,11 +90,11 @@ void	put_error(char *msg, char flag);
 int		clean_up(t_philo *philo, int end);
 void	before_exit(t_philo *philo, char *msg);
 void	free_sem_names(t_philo *philo, int end);
-int		clean_semaphores(t_pinfo *info, int order);
-int		init_object(t_pinfo *info, t_philo **philo);
-int		opt_monitor(t_pinfo *info, t_philo *philos);
-int		manda_monitor(t_pinfo *info, t_philo *philos);
+int		clean_semaphores(t_ginfo *info, int order);
+int		init_object(t_ginfo *info, t_philo **philo);
+int		opt_monitor(t_ginfo *info, t_philo *philos);
+int		manda_monitor(t_ginfo *info, t_philo *philos);
 char	*name_semaphore(char *name, int ph_order);
-int		pars_args(t_pinfo *init, char **args, int ac, int *rvalue);
+int		pars_args(t_ginfo *init, char **args, int ac, int *rvalue);
 
 #endif

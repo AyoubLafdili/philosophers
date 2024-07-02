@@ -1,7 +1,7 @@
 NAME = philo_bonus
 
 COMPILER = cc
-FLAGS = -Wall -Wextra -Werror -pthread# -fsanitize=thread
+FLAGS = -Wall -Wextra -Werror -pthread
 
 _CLEAN = rm -rf
 

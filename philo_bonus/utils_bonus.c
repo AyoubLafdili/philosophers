@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 13:08:23 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:22:05 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 11:04:19 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ void	put_error(char *msg, char flag)
 		write(2, msg, i);
 	else
 	{
-		printf("DONE\n");
 		write(2, READ, 5);
 		write(2, msg, i);
 		write(2, END, 4);

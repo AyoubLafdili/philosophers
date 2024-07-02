@@ -6,11 +6,26 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:48:45 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/10 11:11:14 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 15:39:44 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+int	is_died(t_philo *philos, int index)
+{
+	int	time_to_die;
+
+	time_to_die = philos[0].initial_info->die_time;
+	pthread_mutex_lock(philos[index].p_meal);
+	if (get_time() - philos[index].last_meal >= time_to_die)
+	{
+		pthread_mutex_unlock(philos[index].p_meal);
+		return (0);
+	}
+	pthread_mutex_unlock(philos[index].p_meal);
+	return (1);
+}
 
 int	check_max_meals(t_philo *philos)
 {
@@ -33,22 +48,7 @@ int	check_max_meals(t_philo *philos)
 	return (0);
 }
 
-int	is_died(t_philo *philos, int index)
-{
-	int	time_to_die;
-
-	time_to_die = philos[0].initial_info->die_time;
-	pthread_mutex_lock(philos[index].p_meal);
-	if (get_time() - philos[index].last_meal >= time_to_die)
-	{
-		pthread_mutex_unlock(philos[index].p_meal);
-		return (0);
-	}
-	pthread_mutex_unlock(philos[index].p_meal);
-	return (1);
-}
-
-int	opt_monitor(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
+int	opt_monitor(t_ginfo *info, t_philo *philos, pthread_mutex_t *forks)
 {
 	int		i;
 	int		rvalue;
@@ -76,7 +76,7 @@ int	opt_monitor(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
 	return (0);
 }
 
-int	manda_monitor(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
+int	manda_monitor(t_ginfo *info, t_philo *philos, pthread_mutex_t *forks)
 {
 	int		i;
 	time_t	time_stamp;
@@ -99,7 +99,7 @@ int	manda_monitor(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
 	return (0);
 }
 
-int	monitoring(t_pinfo *info, t_philo *philos, pthread_mutex_t *forks)
+int	monitoring(t_ginfo *info, t_philo *philos, pthread_mutex_t *forks)
 {
 	if (info->eat_time_nb == -2)
 		return (manda_monitor(info, philos, forks));

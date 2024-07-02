@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 12:59:29 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 17:51:04 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int	main(int ac, char *av[])
 {
 	int				rvalue;
-	t_pinfo			info;
+	t_ginfo			info;
 	t_philo			*philo;
 
 	if (ac < 5 || ac > 6)

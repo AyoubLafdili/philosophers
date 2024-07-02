@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 08:50:55 by alafdili          #+#    #+#             */
-/*   Updated: 2024/06/30 22:25:28 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/02 16:44:46 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,23 +30,23 @@ void	sem_subclean(sem_t *sem, char *sem_name)
 	sem_unlink(sem_name);
 }
 
-int	clean_semaphores(t_pinfo *info, int order)
+int	clean_semaphores(t_ginfo *info, int order)
 {
 	if (order == 1)
-		return (sem_subclean(info->sem.forks, "/forks"), 1);
+		return (sem_subclean(info->sem.forks, "/forks"), FAILURE);
 	else if (order == 2)
 		return (sem_subclean(info->sem.s_died, "/died"),
-			clean_semaphores(info, order - 1), 1);
+			clean_semaphores(info, order - 1), FAILURE);
 	else if (order == 3)
 		return (sem_subclean(info->sem.s_print, "/print"),
-			clean_semaphores(info, order - 1), 1);
+			clean_semaphores(info, order - 1), FAILURE);
 	else if (order == 4)
 		return (sem_subclean(info->sem.s_meals_nb, "/meals_nb"),
-			clean_semaphores(info, order - 1), 1);
+			clean_semaphores(info, order - 1), FAILURE);
 	else if (order == 5)
 		return (sem_subclean(info->sem.s_race, "/race"),
-			clean_semaphores(info, order - 1), 1);
-	return (0);
+			clean_semaphores(info, order - 1), FAILURE);
+	return (SUCCES);
 }
 
 int	clean_up(t_philo *philo, int end)
@@ -67,5 +67,5 @@ int	clean_up(t_philo *philo, int end)
 	free_sem_names(philo, philo->shared_info->ph_nb);
 	free(philo->shared_info->flag);
 	free(philo);
-	return (0);
+	return (SUCCES);
 }
