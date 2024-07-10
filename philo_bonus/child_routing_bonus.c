@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/12 18:25:18 by alafdili          #+#    #+#             */
-/*   Updated: 2024/07/02 17:23:18 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/08 17:07:05 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	ft_print(t_philo *philo, char *msg)
 
 	order = philo->order;
 	sem_wait(philo->shared_info->sem.s_print);
-	printf("%ld\t%d\t%s\n", get_timestamp(*philo), order, msg);
+	printf("%ld %d %s\n", get_timestamp(*philo), order, msg);
 	sem_post(philo->shared_info->sem.s_print);
 }
 
@@ -32,7 +32,6 @@ int	eat(t_philo *philo)
 	ft_print(philo, FORKED);
 	ft_print(philo, EAT);
 	sem_wait(philo->s_meal);
-	sem_post(philo->shared_info->sem.s_meals_nb);
 	philo->last_meal = get_time();
 	sem_post(philo->s_meal);
 	ft_sleep(philo->shared_info->eat_time);
@@ -50,16 +49,17 @@ void	*child_routing(void *param)
 	philo = (t_philo *)param;
 	while (1)
 	{
-		if (eat(philo))
-			return (NULL);
 		if (philo->shared_info->eat_time_nb != -2
 			&& meals_counter == philo->shared_info->eat_time_nb)
 		{
+			sem_post(philo->shared_info->sem.s_meals_nb);
 			sem_close(philo->shared_info->sem.s_died);
 			sem_close(philo->shared_info->sem.s_meals_nb);
 			sem_close(philo->s_meal);
 			exit(SUCCES);
 		}
+		if (eat(philo))
+			return (NULL);
 		ft_print(philo, SLEEP);
 		ft_sleep(philo->shared_info->sleep_time);
 		ft_print(philo, THINK);
@@ -99,6 +99,6 @@ int	child_func(t_philo *philo)
 			sem_unlink(philo->sem_name);
 			exit (SUCCES);
 		}
-		usleep(300);
+		usleep(100);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/28 11:37:44 by alafdili          #+#    #+#             */
-/*   Updated: 2024/07/02 17:14:37 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/08 17:03:50 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	*meals_monitor(void *param)
 	info = (t_ginfo *)param;
 	while (check_flag(info) != 1)
 	{
-		if (total_meals == info->eat_time_nb * info->ph_nb)
+		if (total_meals == info->ph_nb)
 		{
 			sem_wait(info->sem.s_print);
 			sem_post(info->sem.s_died);

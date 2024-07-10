@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 13:08:23 by alafdili          #+#    #+#             */
-/*   Updated: 2024/07/02 11:04:19 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/07 14:51:27 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	before_exit(t_philo *philo, char *msg)
 {
 	sem_wait(philo->shared_info->sem.s_print);
 	if (!msg)
-		printf("%ld\t%d\t%s\n", get_timestamp(*philo), philo->order, DIED);
+		printf("%ld %d %s\n", get_timestamp(*philo), philo->order, DIED);
 	else
 		put_error(msg, 0);
 	sem_post(philo->shared_info->sem.s_died);

@@ -6,7 +6,7 @@
 /*   By: alafdili <alafdili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:48:45 by alafdili          #+#    #+#             */
-/*   Updated: 2024/07/02 15:39:44 by alafdili         ###   ########.fr       */
+/*   Updated: 2024/07/07 15:03:03 by alafdili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ int	opt_monitor(t_ginfo *info, t_philo *philos, pthread_mutex_t *forks)
 			if (rvalue != 0)
 			{
 				time_stamp = get_time() - info->start;
-				printf("%ld\t%d\tis died\n", time_stamp, philos[i].order);
+				printf("%ld %d is died\n", time_stamp, philos[i].order);
 			}
 			return (ft_clean(info, philos), free(forks), 0);
 		}
@@ -91,7 +91,7 @@ int	manda_monitor(t_ginfo *info, t_philo *philos, pthread_mutex_t *forks)
 		{
 			ft_update_flag(info, -1);
 			time_stamp = get_time() - info->start;
-			printf("%ld\t%d\tis died\n", time_stamp, philos[i].order);
+			printf("%ld %d is died\n", time_stamp, philos[i].order);
 			return (ft_clean(info, philos), free(forks), 0);
 		}
 		i = (i + 1) % info->philos_nb;
